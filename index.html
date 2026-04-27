@@ -58,6 +58,17 @@
     text-transform: uppercase;
   }
 
+  .watermark-bold {
+    position: absolute;
+    white-space: nowrap;
+    font-size: 28px;
+    font-weight: 800;
+    color: rgba(59, 130, 246, 0.12);
+    transform: rotate(-35deg);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+  }
+
   /* ============ SCREENSHOT DETERRENT FLASH ============ */
   #screenshot-flash {
     position: fixed;
@@ -460,22 +471,25 @@
   .content-card:hover::before { opacity: 1; }
 
   .content-card.locked {
-    opacity: 0.45;
+    opacity: 0.15;
     pointer-events: none;
+    filter: blur(3px);
   }
 
   .content-card.locked::after {
-    content: '🔒 Available on Day ' attr(data-unlock-day);
+    content: '🔒 Day ' attr(data-unlock-day);
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     font-size: 13px;
     color: var(--text-muted);
-    background: var(--bg-card);
+    background: var(--bg-primary);
     padding: 8px 16px;
     border-radius: 8px;
     border: 1px solid var(--border);
     white-space: nowrap;
+    filter: none;
+    opacity: 1;
   }
 
   .card-tag {
@@ -750,8 +764,7 @@
     </div>
 
     <div class="section-tabs">
-      <button class="section-tab active" onclick="showSection('all')">All Content</button>
-      <button class="section-tab" onclick="showSection('concepts')">Key Concepts</button>
+      <button class="section-tab active" onclick="showSection('concepts')">Key Concepts</button>
       <button class="section-tab" onclick="showSection('scenarios')">Scenarios</button>
       <button class="section-tab" onclick="showSection('reflections')">Reflections</button>
       <button class="section-tab" onclick="showSection('challenges')">Challenges</button>
@@ -775,10 +788,41 @@
 // De-Escalation Training for Dispatchers (KTF / DOJ COPS Grant)
 // =================================================================
 const CONFIG = {
-  accessCode: 'DE042826',
-  classDate: '2026-04-28',
   courseTitle: 'De-Escalation Training for Dispatchers',
   accessDays: 31,
+
+  // MULTI-CLASS ACCESS CODES
+  // Each class date gets its own code: DE + MMDDYY
+  // One URL serves all de-escalation classes across the grant
+  classes: [
+    // 2026
+    { code: 'DE042826', date: '2026-04-28' },
+    { code: 'DE080526', date: '2026-08-05' },
+    { code: 'DE082026', date: '2026-08-20' },
+    { code: 'DE092926', date: '2026-09-29' },
+    { code: 'DE102926', date: '2026-10-29' },
+    { code: 'DE113026', date: '2026-11-30' },
+    { code: 'DE120926', date: '2026-12-09' },
+    { code: 'DE123026', date: '2026-12-30' },
+    // 2027
+    { code: 'DE010627', date: '2027-01-06' },
+    { code: 'DE012227', date: '2027-01-22' },
+    { code: 'DE012527', date: '2027-01-25' },
+    { code: 'DE020427', date: '2027-02-04' },
+    { code: 'DE021727', date: '2027-02-17' },
+    { code: 'DE022327', date: '2027-02-23' },
+    { code: 'DE031127', date: '2027-03-11' },
+    { code: 'DE031927', date: '2027-03-19' },
+    { code: 'DE032427', date: '2027-03-24' },
+    { code: 'DE040827', date: '2027-04-08' },
+    { code: 'DE041327', date: '2027-04-13' },
+    { code: 'DE042627', date: '2027-04-26' },
+    { code: 'DE050527', date: '2027-05-05' },
+    { code: 'DE052127', date: '2027-05-21' },
+    { code: 'DE060327', date: '2027-06-03' },
+    { code: 'DE061127', date: '2027-06-11' },
+    { code: 'DE062827', date: '2027-06-28' },
+  ],
 
   content: [
     {
@@ -930,18 +974,20 @@ let currentStudent = null;
 let currentEmail = null;
 let currentAgency = null;
 let currentDay = 0;
+let matchedClassDate = null;
 
 // --- Access Code & Date Validation ---
-function getClassDate() {
-  return new Date(CONFIG.classDate + 'T00:00:00');
+function findClassByCode(code) {
+  return CONFIG.classes.find(c => c.code === code) || null;
 }
 
 function getDayNumber() {
-  const classDate = getClassDate();
+  if (!matchedClassDate) return 0;
+  const classDate = new Date(matchedClassDate + 'T00:00:00');
   const now = new Date();
   const diffTime = now.getTime() - classDate.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays + 1; // Day 1 = class day
+  return diffDays + 1;
 }
 
 function isExpired() {
@@ -978,11 +1024,14 @@ function handleLogin() {
     return;
   }
 
-  if (code !== CONFIG.accessCode.toUpperCase()) {
+  const matched = findClassByCode(code);
+  if (!matched) {
     errorEl.textContent = 'Invalid access code. Please check with your instructor.';
     errorEl.style.display = 'block';
     return;
   }
+
+  matchedClassDate = matched.date;
 
   if (isExpired()) {
     document.getElementById('login-screen').style.display = 'none';
@@ -1037,23 +1086,35 @@ function showDashboard() {
   generateWatermarks();
 
   // Render content
-  renderContent('all');
+  renderContent('concepts');
 }
 
 // --- Watermark ---
 function generateWatermarks() {
   const overlay = document.getElementById('watermark-overlay');
   overlay.innerHTML = '';
-  const text = currentStudent.toUpperCase() + '  |  ' + currentAgency.toUpperCase() + '  |  ' + currentEmail.toUpperCase() + '  |  KTF CONFIDENTIAL';
-  const rows = 14;
-  const cols = 6;
 
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
+  // Layer 1: Bold KTF CONFIDENTIAL (prominent, large)
+  const boldText = 'KTF CONFIDENTIAL  —  PROPRIETARY CONTENT  —  KTF CONFIDENTIAL';
+  for (let r = 0; r < 10; r++) {
+    for (let c = 0; c < 4; c++) {
+      const span = document.createElement('span');
+      span.className = 'watermark-bold';
+      span.textContent = boldText;
+      span.style.top = (r * 160 - 40) + 'px';
+      span.style.left = (c * 700 - 300) + 'px';
+      overlay.appendChild(span);
+    }
+  }
+
+  // Layer 2: Student name, agency, email (subtle, smaller)
+  const idText = currentStudent.toUpperCase() + '  |  ' + currentAgency.toUpperCase() + '  |  ' + currentEmail.toUpperCase();
+  for (let r = 0; r < 14; r++) {
+    for (let c = 0; c < 6; c++) {
       const span = document.createElement('span');
       span.className = 'watermark-text';
-      span.textContent = text;
-      span.style.top = (r * 100 - 50) + 'px';
+      span.textContent = idText;
+      span.style.top = (r * 100 + 30) + 'px';
       span.style.left = (c * 550 - 200) + 'px';
       overlay.appendChild(span);
     }
