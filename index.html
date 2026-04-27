@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KTF Learning Reinforcement Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #0a0f1a;
+    --bg-card: #111827;
+    --bg-card-hover: #1a2332;
+    --border: #1e293b;
+    --border-accent: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.15);
+    --accent-warm: #f59e0b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --watermark-color: rgba(59, 130, 246, 0.07);
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* ============ WATERMARK OVERLAY ============ */
+  #watermark-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .watermark-text {
+    position: absolute;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--watermark-color);
+    transform: rotate(-35deg);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ============ SCREENSHOT DETERRENT FLASH ============ */
+  #screenshot-flash {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: white;
+    z-index: 99999;
+    display: none;
+    pointer-events: none;
+  }
+
+  /* ============ LOGIN SCREEN ============ */
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(245,158,11,0.05) 0%, transparent 50%),
+      var(--bg-primary);
+  }
+
+  .login-container {
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+  }
+
+  .login-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .login-logo .logo-svg {
+    width: 240px;
+    height: auto;
+  }
+  .login-logo .logo-svg svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .login-logo-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .login-logo span {
+    color: var(--text-primary);
+  }
+
+  .login-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .login-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 32px;
+  }
+
+  .login-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .login-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus {
+    border-color: var(--accent);
+  }
+
+  .form-group input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  .login-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .login-footer {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ============ EXPIRED SCREEN ============ */
+  .expired-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .expired-card {
+    max-width: 440px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 32px;
+  }
+
+  .expired-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .expired-card h2 {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  .expired-card p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ============ DASHBOARD ============ */
+  .dashboard {
+    display: none;
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(59,130,246,0.06) 0%, transparent 40%),
+      var(--bg-primary);
+  }
+
+  .dash-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .dash-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .dash-brand .logo-svg {
+    width: 160px;
+    height: auto;
+    display: flex;
+    align-items: center;
+  }
+  .dash-brand .logo-svg svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .dash-brand span { color: var(--text-primary); }
+
+  .dash-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .days-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 13px;
+  }
+
+  .days-badge.warning {
+    background: rgba(245,158,11,0.1);
+    border-color: rgba(245,158,11,0.2);
+    color: var(--accent-warm);
+  }
+
+  .days-badge.critical {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.2);
+    color: var(--danger);
+  }
+
+  .dash-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+  }
+
+  .welcome-section {
+    margin-bottom: 36px;
+  }
+
+  .welcome-section h1 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .welcome-section p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 600px;
+  }
+
+  /* Progress Bar */
+  .progress-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .progress-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .progress-header span {
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #60a5fa);
+    border-radius: 4px;
+    transition: width 0.8s ease;
+  }
+
+  /* Section Tabs */
+  .section-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .section-tab {
+    padding: 10px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .section-tab:hover { border-color: var(--border-accent); }
+
+  .section-tab.active {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Content Cards */
+  .content-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .content-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    transition: all 0.25s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .content-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .content-card:hover {
+    border-color: var(--border-accent);
+    background: var(--bg-card-hover);
+  }
+
+  .content-card:hover::before { opacity: 1; }
+
+  .content-card.locked {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .content-card.locked::after {
+    content: '🔒 Available on Day ' attr(data-unlock-day);
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .card-tag.scenario { color: var(--accent-warm); }
+  .card-tag.reflection { color: var(--success); }
+  .card-tag.challenge { color: #a78bfa; }
+
+  .content-card h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .content-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  .card-prompt {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--bg-primary);
+    border-radius: 10px;
+    border-left: 3px solid var(--accent);
+  }
+
+  .card-prompt p {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  /* Footer */
+  .dash-footer {
+    text-align: center;
+    padding: 32px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .confidential-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.15);
+    border-radius: 8px;
+    color: var(--danger);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 600px) {
+    .dash-header { padding: 16px; }
+    .dash-content { padding: 24px 16px 48px; }
+    .welcome-section h1 { font-size: 26px; }
+    .login-card { padding: 28px 20px; }
+    .content-card { padding: 20px; }
+  }
+
+  /* ============ PRINT BLOCK ============ */
+  @media print {
+    body::before {
+      content: 'PRINTING IS NOT PERMITTED — PROPRIETARY CONTENT — THE KIM TURNER FOUNDATION';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: red;
+      background: white;
+      z-index: 999999;
+    }
+    body * { display: none !important; }
+  }
+
+  /* Disable image dragging */
+  img { -webkit-user-drag: none; user-drag: none; }
+</style>
+</head>
+<body>
+
+<!-- SCREENSHOT FLASH -->
+<div id="screenshot-flash"></div>
+
+<!-- WATERMARK OVERLAY (generated dynamically) -->
+<div id="watermark-overlay"></div>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="login-screen" class="login-screen">
+  <div class="login-container">
+    <div class="login-logo"><div class="logo-svg"><svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 458.28 152.37">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        stroke-width: 2.5px;
+      }
+    </style>
+  </defs>
+  <title>TKTF-art2021 white</title>
+  <g>
+    <path class="cls-1" d="M73.9,25.54H85.17V58h.35L98.39,25.54h11.23L95.26,60.38l16,39.45h-12L85.52,64.47h-.35V99.83H73.9Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M117.62,25.54h11.26V99.83H117.62Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M141.59,25.54h14.7l7.13,28.75c.75,3.19,1.35,6.23,1.78,9.11s.86,5.61,1.27,8.16h.34q.62-3.82,1.27-8.16t1.78-9.11l7.35-28.75h14.4V99.83H181.08V75.25c0-3.76,0-7.39.11-10.87s.17-6.68.28-9.59.25-5.49.39-7.72.28-4,.4-5.31h-.83l-11.22,48.5h-7.14l-11.31-48.5h-.82q.17,2,.39,5.31c.14,2.23.27,4.81.39,7.72s.21,6.11.28,9.59.11,7.11.11,10.87V99.83H141.59Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M230.23,34.41h-12V25.54h35.15v8.87H241.5V99.83H230.23Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M260.77,25.54h11.35V80a40,40,0,0,0,.35,5.78,11,11,0,0,0,1.11,3.68,4.53,4.53,0,0,0,1.95,2,6.31,6.31,0,0,0,2.85.59,6.59,6.59,0,0,0,2.9-.59,4.76,4.76,0,0,0,2-2,11.31,11.31,0,0,0,1.22-3.68A34.22,34.22,0,0,0,285,80V25.54h11.22V77a43,43,0,0,1-.87,9.31,24.65,24.65,0,0,1-2.3,6.48,14.05,14.05,0,0,1-3.29,4.14,14.64,14.64,0,0,1-3.82,2.32,14.91,14.91,0,0,1-3.94,1,33.56,33.56,0,0,1-3.57.21,33,33,0,0,1-3.54-.21,14.63,14.63,0,0,1-7.68-3.35,14.32,14.32,0,0,1-3.26-4.14,23.94,23.94,0,0,1-2.28-6.46,43.66,43.66,0,0,1-.85-9.33Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M308.61,25.54h12.23c1.39,0,2.92.06,4.59.17a26.55,26.55,0,0,1,5,.85,20.22,20.22,0,0,1,4.83,2,14.25,14.25,0,0,1,4.13,3.7,18.51,18.51,0,0,1,2.89,5.89,29.43,29.43,0,0,1,1.09,8.59v1.87q0,8.49-2.44,13.81a15.23,15.23,0,0,1-7.17,7.68l11.91,29.71H333.76L323.88,72h-4.22V99.83H308.61ZM321.36,63.9a16.76,16.76,0,0,0,5-.65,6.9,6.9,0,0,0,3.31-2.2A9.6,9.6,0,0,0,331.49,57a29.25,29.25,0,0,0,.57-6.28V44.81a21,21,0,0,0-.52-5,7.86,7.86,0,0,0-1.76-3.44,7.51,7.51,0,0,0-3.29-2,17.27,17.27,0,0,0-5.13-.65h-1.7V63.9Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M354.2,25.54h9.13l18,49.71h.26c-.08-1.15-.2-2.45-.35-3.87s-.27-3-.39-4.85-.21-3.86-.3-6.15-.13-4.87-.13-7.74V25.54h10.09V99.83H381.3L363.38,51.42H363c.09,1.3.2,2.72.35,4.24s.27,3.31.39,5.37.22,4.46.3,7.2.13,6,.13,9.77V99.83h-10Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M403.22,25.54h27.53v8.87H414.49V56.64h12.57v8.87H414.49V91h16.7v8.87h-28Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M439.32,25.54h12.22c1.4,0,2.93.06,4.59.17a26.52,26.52,0,0,1,5,.85,20,20,0,0,1,4.82,2,14.28,14.28,0,0,1,4.14,3.7A18.72,18.72,0,0,1,473,38.17a29.77,29.77,0,0,1,1.09,8.59v1.87q0,8.49-2.44,13.81a15.25,15.25,0,0,1-7.18,7.68l11.92,29.71H464.46L454.59,72h-4.22V99.83H439.32ZM452.07,63.9a16.76,16.76,0,0,0,5-.65,7,7,0,0,0,3.31-2.2A9.73,9.73,0,0,0,462.2,57a29.25,29.25,0,0,0,.57-6.28V44.81a21,21,0,0,0-.52-5,7.77,7.77,0,0,0-1.77-3.44,7.41,7.41,0,0,0-3.28-2,17.27,17.27,0,0,0-5.13-.65h-1.7V63.9Z" transform="translate(-18.1 -25.54)"/>
+  </g>
+  <g>
+    <path class="cls-1" d="M22.38,94.24v5.67h-4.2V83.25h4.2V88.9h31v5.34Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M18.18,71.2V65.86H32.92V59.53H18.18V54.19H53.39v5.34H37.12v6.33H53.39V71.2Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M18.18,39.69v-13h4.2v7.71H32.92v-6h4.2v6H49.18V26.43h4.21V39.69Z" transform="translate(-18.1 -25.54)"/>
+  </g>
+  <g>
+    <path class="cls-1" d="M18.19,134.22H34.75v5.18h-10v12.95h7.83v5.18H24.76v20H18.19Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M72.6,177.91a16.75,16.75,0,0,1-2.25-.16,8.59,8.59,0,0,1-2.41-.7,8.94,8.94,0,0,1-2.3-1.51,9.29,9.29,0,0,1-2-2.57A15,15,0,0,1,62.34,169a26.74,26.74,0,0,1-.51-5.6V148.09a25.74,25.74,0,0,1,.52-5.59,14.64,14.64,0,0,1,1.38-3.9,8.44,8.44,0,0,1,4.27-4,9.4,9.4,0,0,1,2.4-.64,16,16,0,0,1,2.2-.16,19.14,19.14,0,0,1,2.15.14,9.7,9.7,0,0,1,2.35.61,8.36,8.36,0,0,1,2.3,1.4,8.47,8.47,0,0,1,2,2.51,15.21,15.21,0,0,1,1.38,3.93,26.3,26.3,0,0,1,.52,5.66v15.34a25.32,25.32,0,0,1-.53,5.54,15.75,15.75,0,0,1-1.4,3.93,8.84,8.84,0,0,1-2,2.59A9.68,9.68,0,0,1,77.05,177a8.43,8.43,0,0,1-2.34.73A15.27,15.27,0,0,1,72.6,177.91Zm0-4.94a4,4,0,0,0,1.69-.33,2.66,2.66,0,0,0,1.19-1.14,6.76,6.76,0,0,0,.71-2.15,19.3,19.3,0,0,0,.24-3.35V146.29a21,21,0,0,0-.24-3.47,7.2,7.2,0,0,0-.71-2.24,2.78,2.78,0,0,0-1.19-1.21A3.73,3.73,0,0,0,72.6,139a3.89,3.89,0,0,0-1.72.35,2.84,2.84,0,0,0-1.22,1.21,6.93,6.93,0,0,0-.72,2.24,21,21,0,0,0-.24,3.47V166a19.3,19.3,0,0,0,.24,3.35,6.51,6.51,0,0,0,.72,2.15,2.72,2.72,0,0,0,1.22,1.14A4.19,4.19,0,0,0,72.6,173Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M113.23,134.22h6.62V166a22.55,22.55,0,0,0,.2,3.37,6.39,6.39,0,0,0,.64,2.14,2.66,2.66,0,0,0,1.15,1.15,3.81,3.81,0,0,0,1.66.34,4,4,0,0,0,1.68-.34,2.74,2.74,0,0,0,1.19-1.15,6.3,6.3,0,0,0,.71-2.14,19.51,19.51,0,0,0,.25-3.37V134.22h6.54v30a25,25,0,0,1-.51,5.43,14.73,14.73,0,0,1-1.34,3.77,8.1,8.1,0,0,1-1.92,2.41,8.62,8.62,0,0,1-2.23,1.36,8.92,8.92,0,0,1-2.29.6,20.26,20.26,0,0,1-2.08.12,19.63,19.63,0,0,1-2.07-.12,8.78,8.78,0,0,1-2.27-.6,8.52,8.52,0,0,1-2.21-1.36,8.22,8.22,0,0,1-1.9-2.41,14.29,14.29,0,0,1-1.33-3.76,25.72,25.72,0,0,1-.49-5.44Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M165,134.22h5.32l10.5,29H181c0-.68-.12-1.43-.2-2.26s-.16-1.77-.23-2.83-.13-2.25-.18-3.59-.07-2.84-.07-4.51v-15.8h5.88v43.31H180.8l-10.44-28.22h-.21c0,.76.12,1.59.21,2.47s.16,1.93.22,3.14.13,2.59.18,4.19.08,3.5.08,5.69v12.73H165Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M217.47,134.22h6.82q1.54,0,3.21.09a14.17,14.17,0,0,1,3.24.55,10.28,10.28,0,0,1,3,1.41,8.72,8.72,0,0,1,2.47,2.66,14.46,14.46,0,0,1,1.68,4.31,27.37,27.37,0,0,1,.63,6.35v12.58a27.52,27.52,0,0,1-.63,6.36,14.25,14.25,0,0,1-1.68,4.31,8.79,8.79,0,0,1-2.47,2.65,10.82,10.82,0,0,1-3,1.41,14.73,14.73,0,0,1-3.24.54q-1.67.09-3.21.09h-6.82Zm8.24,38.72a8.17,8.17,0,0,0,2.93-.45,3.6,3.6,0,0,0,1.82-1.61,8.41,8.41,0,0,0,.93-3.15,40.82,40.82,0,0,0,.25-5V149.26a40.82,40.82,0,0,0-.25-5,8.41,8.41,0,0,0-.93-3.15,3.6,3.6,0,0,0-1.82-1.61,8.17,8.17,0,0,0-2.93-.45H224v33.92Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M273,134.22h7.55l8,43.31H282l-1.19-7.76h-7.91l-1.14,7.76H265Zm7,30.61-3-21.58h-.28l-3.07,21.58Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M320.67,139.4h-7v-5.18h20.49v5.18h-6.95v38.13h-6.57Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M362.51,134.22h6.57v43.31h-6.57Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M410,177.91a16.78,16.78,0,0,1-2.26-.16,8.59,8.59,0,0,1-2.41-.7,8.89,8.89,0,0,1-2.29-1.51,9.12,9.12,0,0,1-2-2.57,15.36,15.36,0,0,1-1.35-3.94,26.74,26.74,0,0,1-.51-5.6V148.09a25.74,25.74,0,0,1,.52-5.59,15,15,0,0,1,1.38-3.9,8.64,8.64,0,0,1,2-2.52,8.47,8.47,0,0,1,2.3-1.44,9.51,9.51,0,0,1,2.4-.64,16.07,16.07,0,0,1,2.21-.16,19.12,19.12,0,0,1,2.14.14,9.9,9.9,0,0,1,2.36.61,8.35,8.35,0,0,1,4.27,3.91,15.21,15.21,0,0,1,1.38,3.93,26.3,26.3,0,0,1,.52,5.66v15.34a25.32,25.32,0,0,1-.53,5.54,15.75,15.75,0,0,1-1.4,3.93,8.84,8.84,0,0,1-2,2.59,9.84,9.84,0,0,1-2.3,1.52,8.6,8.6,0,0,1-2.35.73A15.26,15.26,0,0,1,410,177.91Zm0-4.94a4,4,0,0,0,1.68-.33,2.66,2.66,0,0,0,1.19-1.14,6.52,6.52,0,0,0,.71-2.15,19.3,19.3,0,0,0,.24-3.35V146.29a21,21,0,0,0-.24-3.47,7,7,0,0,0-.71-2.24,2.78,2.78,0,0,0-1.19-1.21A3.71,3.71,0,0,0,410,139a3.9,3.9,0,0,0-1.73.35,2.84,2.84,0,0,0-1.22,1.21,6.93,6.93,0,0,0-.72,2.24,21,21,0,0,0-.24,3.47V166a19.3,19.3,0,0,0,.24,3.35,6.51,6.51,0,0,0,.72,2.15,2.72,2.72,0,0,0,1.22,1.14A4.2,4.2,0,0,0,410,173Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M450.73,134.22h5.32l10.5,29h.16c-.06-.68-.12-1.43-.21-2.26s-.16-1.77-.23-2.83-.12-2.25-.17-3.59S466,151.69,466,150v-15.8h5.88v43.31h-5.37l-10.45-28.22h-.2c.05.76.12,1.59.2,2.47s.16,1.93.23,3.14.13,2.59.18,4.19.07,3.5.07,5.69v12.73h-5.83Z" transform="translate(-18.1 -25.54)"/>
+  </g>
+  <line class="cls-2" y1="92.93" x2="458.14" y2="92.93"/>
+</svg></div><div class="login-logo-text">De-escalation Training Funded by DOJ COPS Office</div></div>
+    <div class="login-subtitle">Learning Reinforcement Portal</div>
+    <div class="login-card">
+      <h2>Welcome Back</h2>
+      <p>Enter your information and access code provided by your instructor to continue your learning reinforcement.</p>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="student-name" placeholder="As it appears on your class roster" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Work Email</label>
+        <input type="email" id="student-email" placeholder="Your agency or work email address" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Agency / Organization</label>
+        <input type="text" id="student-agency" placeholder="Your agency or department name" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Access Code</label>
+        <input type="text" id="access-code" placeholder="Provided by your instructor" autocomplete="off" maxlength="12">
+      </div>
+      <button class="btn-primary" onclick="handleLogin()">Access My Dashboard</button>
+      <div id="login-error" class="login-error"></div>
+    </div>
+    <div class="login-footer">
+      This portal contains proprietary and licensed content.<br>
+      Unauthorized reproduction, distribution, or photography is strictly prohibited.<br>
+      Funded by the DOJ COPS Office. &copy; The Kim Turner Foundation. All rights reserved.
+    </div>
+  </div>
+</div>
+
+<!-- ============ EXPIRED SCREEN ============ -->
+<div id="expired-screen" class="expired-screen" style="display:none;">
+  <div class="expired-card">
+    <div class="expired-icon">⏱️</div>
+    <h2>Access Period Has Ended</h2>
+    <p>Your 31-day learning reinforcement access for this course has expired. If you believe this is an error or would like to discuss extended access, please contact your instructor.</p>
+    <div style="margin-top:24px; font-size:13px; color:var(--text-muted);">
+      The Kim Turner Foundation &bull; info@kimturnerfoundation.org
+    </div>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboard" class="dashboard">
+  <div class="dash-header">
+    <div class="dash-brand"><div class="logo-svg"><svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 458.28 152.37">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        stroke-width: 2.5px;
+      }
+    </style>
+  </defs>
+  <title>TKTF-art2021 white</title>
+  <g>
+    <path class="cls-1" d="M73.9,25.54H85.17V58h.35L98.39,25.54h11.23L95.26,60.38l16,39.45h-12L85.52,64.47h-.35V99.83H73.9Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M117.62,25.54h11.26V99.83H117.62Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M141.59,25.54h14.7l7.13,28.75c.75,3.19,1.35,6.23,1.78,9.11s.86,5.61,1.27,8.16h.34q.62-3.82,1.27-8.16t1.78-9.11l7.35-28.75h14.4V99.83H181.08V75.25c0-3.76,0-7.39.11-10.87s.17-6.68.28-9.59.25-5.49.39-7.72.28-4,.4-5.31h-.83l-11.22,48.5h-7.14l-11.31-48.5h-.82q.17,2,.39,5.31c.14,2.23.27,4.81.39,7.72s.21,6.11.28,9.59.11,7.11.11,10.87V99.83H141.59Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M230.23,34.41h-12V25.54h35.15v8.87H241.5V99.83H230.23Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M260.77,25.54h11.35V80a40,40,0,0,0,.35,5.78,11,11,0,0,0,1.11,3.68,4.53,4.53,0,0,0,1.95,2,6.31,6.31,0,0,0,2.85.59,6.59,6.59,0,0,0,2.9-.59,4.76,4.76,0,0,0,2-2,11.31,11.31,0,0,0,1.22-3.68A34.22,34.22,0,0,0,285,80V25.54h11.22V77a43,43,0,0,1-.87,9.31,24.65,24.65,0,0,1-2.3,6.48,14.05,14.05,0,0,1-3.29,4.14,14.64,14.64,0,0,1-3.82,2.32,14.91,14.91,0,0,1-3.94,1,33.56,33.56,0,0,1-3.57.21,33,33,0,0,1-3.54-.21,14.63,14.63,0,0,1-7.68-3.35,14.32,14.32,0,0,1-3.26-4.14,23.94,23.94,0,0,1-2.28-6.46,43.66,43.66,0,0,1-.85-9.33Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M308.61,25.54h12.23c1.39,0,2.92.06,4.59.17a26.55,26.55,0,0,1,5,.85,20.22,20.22,0,0,1,4.83,2,14.25,14.25,0,0,1,4.13,3.7,18.51,18.51,0,0,1,2.89,5.89,29.43,29.43,0,0,1,1.09,8.59v1.87q0,8.49-2.44,13.81a15.23,15.23,0,0,1-7.17,7.68l11.91,29.71H333.76L323.88,72h-4.22V99.83H308.61ZM321.36,63.9a16.76,16.76,0,0,0,5-.65,6.9,6.9,0,0,0,3.31-2.2A9.6,9.6,0,0,0,331.49,57a29.25,29.25,0,0,0,.57-6.28V44.81a21,21,0,0,0-.52-5,7.86,7.86,0,0,0-1.76-3.44,7.51,7.51,0,0,0-3.29-2,17.27,17.27,0,0,0-5.13-.65h-1.7V63.9Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M354.2,25.54h9.13l18,49.71h.26c-.08-1.15-.2-2.45-.35-3.87s-.27-3-.39-4.85-.21-3.86-.3-6.15-.13-4.87-.13-7.74V25.54h10.09V99.83H381.3L363.38,51.42H363c.09,1.3.2,2.72.35,4.24s.27,3.31.39,5.37.22,4.46.3,7.2.13,6,.13,9.77V99.83h-10Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M403.22,25.54h27.53v8.87H414.49V56.64h12.57v8.87H414.49V91h16.7v8.87h-28Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M439.32,25.54h12.22c1.4,0,2.93.06,4.59.17a26.52,26.52,0,0,1,5,.85,20,20,0,0,1,4.82,2,14.28,14.28,0,0,1,4.14,3.7A18.72,18.72,0,0,1,473,38.17a29.77,29.77,0,0,1,1.09,8.59v1.87q0,8.49-2.44,13.81a15.25,15.25,0,0,1-7.18,7.68l11.92,29.71H464.46L454.59,72h-4.22V99.83H439.32ZM452.07,63.9a16.76,16.76,0,0,0,5-.65,7,7,0,0,0,3.31-2.2A9.73,9.73,0,0,0,462.2,57a29.25,29.25,0,0,0,.57-6.28V44.81a21,21,0,0,0-.52-5,7.77,7.77,0,0,0-1.77-3.44,7.41,7.41,0,0,0-3.28-2,17.27,17.27,0,0,0-5.13-.65h-1.7V63.9Z" transform="translate(-18.1 -25.54)"/>
+  </g>
+  <g>
+    <path class="cls-1" d="M22.38,94.24v5.67h-4.2V83.25h4.2V88.9h31v5.34Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M18.18,71.2V65.86H32.92V59.53H18.18V54.19H53.39v5.34H37.12v6.33H53.39V71.2Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M18.18,39.69v-13h4.2v7.71H32.92v-6h4.2v6H49.18V26.43h4.21V39.69Z" transform="translate(-18.1 -25.54)"/>
+  </g>
+  <g>
+    <path class="cls-1" d="M18.19,134.22H34.75v5.18h-10v12.95h7.83v5.18H24.76v20H18.19Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M72.6,177.91a16.75,16.75,0,0,1-2.25-.16,8.59,8.59,0,0,1-2.41-.7,8.94,8.94,0,0,1-2.3-1.51,9.29,9.29,0,0,1-2-2.57A15,15,0,0,1,62.34,169a26.74,26.74,0,0,1-.51-5.6V148.09a25.74,25.74,0,0,1,.52-5.59,14.64,14.64,0,0,1,1.38-3.9,8.44,8.44,0,0,1,4.27-4,9.4,9.4,0,0,1,2.4-.64,16,16,0,0,1,2.2-.16,19.14,19.14,0,0,1,2.15.14,9.7,9.7,0,0,1,2.35.61,8.36,8.36,0,0,1,2.3,1.4,8.47,8.47,0,0,1,2,2.51,15.21,15.21,0,0,1,1.38,3.93,26.3,26.3,0,0,1,.52,5.66v15.34a25.32,25.32,0,0,1-.53,5.54,15.75,15.75,0,0,1-1.4,3.93,8.84,8.84,0,0,1-2,2.59A9.68,9.68,0,0,1,77.05,177a8.43,8.43,0,0,1-2.34.73A15.27,15.27,0,0,1,72.6,177.91Zm0-4.94a4,4,0,0,0,1.69-.33,2.66,2.66,0,0,0,1.19-1.14,6.76,6.76,0,0,0,.71-2.15,19.3,19.3,0,0,0,.24-3.35V146.29a21,21,0,0,0-.24-3.47,7.2,7.2,0,0,0-.71-2.24,2.78,2.78,0,0,0-1.19-1.21A3.73,3.73,0,0,0,72.6,139a3.89,3.89,0,0,0-1.72.35,2.84,2.84,0,0,0-1.22,1.21,6.93,6.93,0,0,0-.72,2.24,21,21,0,0,0-.24,3.47V166a19.3,19.3,0,0,0,.24,3.35,6.51,6.51,0,0,0,.72,2.15,2.72,2.72,0,0,0,1.22,1.14A4.19,4.19,0,0,0,72.6,173Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M113.23,134.22h6.62V166a22.55,22.55,0,0,0,.2,3.37,6.39,6.39,0,0,0,.64,2.14,2.66,2.66,0,0,0,1.15,1.15,3.81,3.81,0,0,0,1.66.34,4,4,0,0,0,1.68-.34,2.74,2.74,0,0,0,1.19-1.15,6.3,6.3,0,0,0,.71-2.14,19.51,19.51,0,0,0,.25-3.37V134.22h6.54v30a25,25,0,0,1-.51,5.43,14.73,14.73,0,0,1-1.34,3.77,8.1,8.1,0,0,1-1.92,2.41,8.62,8.62,0,0,1-2.23,1.36,8.92,8.92,0,0,1-2.29.6,20.26,20.26,0,0,1-2.08.12,19.63,19.63,0,0,1-2.07-.12,8.78,8.78,0,0,1-2.27-.6,8.52,8.52,0,0,1-2.21-1.36,8.22,8.22,0,0,1-1.9-2.41,14.29,14.29,0,0,1-1.33-3.76,25.72,25.72,0,0,1-.49-5.44Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M165,134.22h5.32l10.5,29H181c0-.68-.12-1.43-.2-2.26s-.16-1.77-.23-2.83-.13-2.25-.18-3.59-.07-2.84-.07-4.51v-15.8h5.88v43.31H180.8l-10.44-28.22h-.21c0,.76.12,1.59.21,2.47s.16,1.93.22,3.14.13,2.59.18,4.19.08,3.5.08,5.69v12.73H165Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M217.47,134.22h6.82q1.54,0,3.21.09a14.17,14.17,0,0,1,3.24.55,10.28,10.28,0,0,1,3,1.41,8.72,8.72,0,0,1,2.47,2.66,14.46,14.46,0,0,1,1.68,4.31,27.37,27.37,0,0,1,.63,6.35v12.58a27.52,27.52,0,0,1-.63,6.36,14.25,14.25,0,0,1-1.68,4.31,8.79,8.79,0,0,1-2.47,2.65,10.82,10.82,0,0,1-3,1.41,14.73,14.73,0,0,1-3.24.54q-1.67.09-3.21.09h-6.82Zm8.24,38.72a8.17,8.17,0,0,0,2.93-.45,3.6,3.6,0,0,0,1.82-1.61,8.41,8.41,0,0,0,.93-3.15,40.82,40.82,0,0,0,.25-5V149.26a40.82,40.82,0,0,0-.25-5,8.41,8.41,0,0,0-.93-3.15,3.6,3.6,0,0,0-1.82-1.61,8.17,8.17,0,0,0-2.93-.45H224v33.92Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M273,134.22h7.55l8,43.31H282l-1.19-7.76h-7.91l-1.14,7.76H265Zm7,30.61-3-21.58h-.28l-3.07,21.58Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M320.67,139.4h-7v-5.18h20.49v5.18h-6.95v38.13h-6.57Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M362.51,134.22h6.57v43.31h-6.57Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M410,177.91a16.78,16.78,0,0,1-2.26-.16,8.59,8.59,0,0,1-2.41-.7,8.89,8.89,0,0,1-2.29-1.51,9.12,9.12,0,0,1-2-2.57,15.36,15.36,0,0,1-1.35-3.94,26.74,26.74,0,0,1-.51-5.6V148.09a25.74,25.74,0,0,1,.52-5.59,15,15,0,0,1,1.38-3.9,8.64,8.64,0,0,1,2-2.52,8.47,8.47,0,0,1,2.3-1.44,9.51,9.51,0,0,1,2.4-.64,16.07,16.07,0,0,1,2.21-.16,19.12,19.12,0,0,1,2.14.14,9.9,9.9,0,0,1,2.36.61,8.35,8.35,0,0,1,4.27,3.91,15.21,15.21,0,0,1,1.38,3.93,26.3,26.3,0,0,1,.52,5.66v15.34a25.32,25.32,0,0,1-.53,5.54,15.75,15.75,0,0,1-1.4,3.93,8.84,8.84,0,0,1-2,2.59,9.84,9.84,0,0,1-2.3,1.52,8.6,8.6,0,0,1-2.35.73A15.26,15.26,0,0,1,410,177.91Zm0-4.94a4,4,0,0,0,1.68-.33,2.66,2.66,0,0,0,1.19-1.14,6.52,6.52,0,0,0,.71-2.15,19.3,19.3,0,0,0,.24-3.35V146.29a21,21,0,0,0-.24-3.47,7,7,0,0,0-.71-2.24,2.78,2.78,0,0,0-1.19-1.21A3.71,3.71,0,0,0,410,139a3.9,3.9,0,0,0-1.73.35,2.84,2.84,0,0,0-1.22,1.21,6.93,6.93,0,0,0-.72,2.24,21,21,0,0,0-.24,3.47V166a19.3,19.3,0,0,0,.24,3.35,6.51,6.51,0,0,0,.72,2.15,2.72,2.72,0,0,0,1.22,1.14A4.2,4.2,0,0,0,410,173Z" transform="translate(-18.1 -25.54)"/>
+    <path class="cls-1" d="M450.73,134.22h5.32l10.5,29h.16c-.06-.68-.12-1.43-.21-2.26s-.16-1.77-.23-2.83-.12-2.25-.17-3.59S466,151.69,466,150v-15.8h5.88v43.31h-5.37l-10.45-28.22h-.2c.05.76.12,1.59.2,2.47s.16,1.93.23,3.14.13,2.59.18,4.19.07,3.5.07,5.69v12.73h-5.83Z" transform="translate(-18.1 -25.54)"/>
+  </g>
+  <line class="cls-2" y1="92.93" x2="458.14" y2="92.93"/>
+</svg></div>De-escalation Training</div>
+    <div class="dash-meta">
+      <span id="student-display"></span>
+      <div id="days-remaining" class="days-badge"></div>
+    </div>
+  </div>
+
+  <div class="dash-content">
+    <div class="welcome-section">
+      <h1 id="welcome-msg">Welcome back</h1>
+      <p id="course-title-display" style="font-size:13px; color:var(--accent); text-transform:uppercase; letter-spacing:2px; font-weight:600; margin-bottom:8px;"></p>
+      <p>This portal reinforces key concepts from your training. New content unlocks daily. Revisit often to strengthen retention and build lasting skills.</p>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-header">
+        <h3>31-Day Journey</h3>
+        <span id="progress-label">Day 1 of 31</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill" style="width: 3%"></div>
+      </div>
+    </div>
+
+    <div class="section-tabs">
+      <button class="section-tab active" onclick="showSection('all')">All Content</button>
+      <button class="section-tab" onclick="showSection('concepts')">Key Concepts</button>
+      <button class="section-tab" onclick="showSection('scenarios')">Scenarios</button>
+      <button class="section-tab" onclick="showSection('reflections')">Reflections</button>
+      <button class="section-tab" onclick="showSection('challenges')">Challenges</button>
+    </div>
+
+    <div id="content-grid" class="content-grid">
+      <!-- Cards injected by JS -->
+    </div>
+  </div>
+
+  <div class="dash-footer">
+    <div class="confidential-notice">⚠ Proprietary &amp; Licensed Content</div><br>
+    This material is the property of The Kim Turner Foundation and licensed content owners.<br>
+    Reproduction, screenshots, photography, or redistribution in any form is prohibited.<br>
+    Funded by the DOJ COPS Office. &copy; The Kim Turner Foundation. All rights reserved.
+  </div>
+</div>
+
+<script>
+// =================================================================
+// De-Escalation Training for Dispatchers (KTF / DOJ COPS Grant)
+// =================================================================
+const CONFIG = {
+  accessCode: 'DE042826',
+  classDate: '2026-04-28',
+  courseTitle: 'De-Escalation Training for Dispatchers',
+  accessDays: 31,
+
+  content: [
+    {
+      type: 'concept', unlockDay: 1,
+      title: 'The Dispatcher as the First De-Escalator',
+      body: 'Before any officer arrives on scene, you are the first point of contact. Your voice, your tone, and your word choices set the trajectory of the entire interaction. De-escalation begins the moment you answer the call.',
+      prompt: 'Think about your most recent call involving a heightened caller. At what point did you have the greatest opportunity to redirect the conversation? Did you take it?'
+    },
+    {
+      type: 'concept', unlockDay: 2,
+      title: 'Recognizing Escalation Before It Peaks',
+      body: 'Escalation rarely happens all at once. It builds through vocal cues, language shifts, and increasing emotional intensity. The earlier you recognize the pattern, the more options you have to redirect it.',
+      prompt: 'List three vocal or verbal cues that signal a caller is beginning to escalate. How early in a call can you typically identify them?'
+    },
+    {
+      type: 'concept', unlockDay: 3,
+      title: 'Tone Is a Tool',
+      body: 'Your tone of voice communicates authority, empathy, calm, or urgency, sometimes all in the same call. Matching your tone to the situation, not to the caller\'s emotion, is one of the most powerful de-escalation techniques you have.',
+      prompt: 'Record yourself (audio only) during a routine call. Listen back. Does your tone convey what you intend? Where could you adjust?'
+    },
+    {
+      type: 'scenario', unlockDay: 4,
+      title: 'Scenario: The Caller Who Won\'t Stop Talking',
+      body: 'A caller is highly emotional, speaking rapidly, and repeating themselves. You need critical information to dispatch resources, but every attempt to redirect is met with more talking.',
+      prompt: 'How do you create a pause without cutting the caller off? What language can you use to acknowledge their emotion while regaining control of the call?'
+    },
+    {
+      type: 'concept', unlockDay: 5,
+      title: 'Empathic Acknowledgment',
+      body: 'Telling someone to "calm down" rarely works. What does work is acknowledging what they are feeling before redirecting. Empathic acknowledgment is not agreement. It is a bridge between the caller\'s emotional state and the information you need.',
+      prompt: 'Practice this phrase: "I can hear that this is very frightening for you, and I want to help. I need to ask you a few questions so we can get someone to you right away." How does this compare to your current approach?'
+    },
+    {
+      type: 'reflection', unlockDay: 6,
+      title: 'Week 1 Reflection',
+      body: 'You are one week past training. The real test of de-escalation skills is not in the classroom. It is on the headset.',
+      prompt: 'Name one call this week where you consciously applied a de-escalation technique from training. What happened? What would you do differently?'
+    },
+    {
+      type: 'concept', unlockDay: 7,
+      title: 'The Language of Choice',
+      body: 'People are more likely to comply when they feel they have options, even limited ones. Offering choices gives the caller a sense of agency and reduces resistance.',
+      prompt: 'Instead of "You need to stay on the line," try "Would you like to stay on the line with me, or would you prefer I call you back in two minutes?" Notice how the dynamic shifts.'
+    },
+    {
+      type: 'scenario', unlockDay: 8,
+      title: 'Scenario: The Caller in Crisis',
+      body: 'A caller indicates they are thinking about harming themselves. They are calm but distant. You need to keep them engaged while coordinating a response.',
+      prompt: 'What is the most important thing to do in the first 30 seconds? How do you balance gathering information with maintaining connection?'
+    },
+    {
+      type: 'concept', unlockDay: 9,
+      title: 'Managing Your Own Stress Response',
+      body: 'When a caller escalates, your body responds. Your heart rate increases, your breathing becomes shallow, and your thinking narrows. Recognizing your own stress response is the first step to staying effective.',
+      prompt: 'What is your personal stress indicator? Is it tension in your shoulders, a change in your breathing, or something else? Identify it so you can catch it early.'
+    },
+    {
+      type: 'scenario', unlockDay: 10,
+      title: 'Scenario: The Hostile Third Party',
+      body: 'You are on a call with a reporting party when a second person grabs the phone. They are angry, aggressive, and accusing you of not doing your job. The original caller is still in danger.',
+      prompt: 'How do you manage two competing priorities: de-escalating the hostile person and maintaining information flow about the emergency?'
+    },
+    {
+      type: 'challenge', unlockDay: 11,
+      title: 'Challenge: The Pause Technique',
+      body: 'For your next three calls involving elevated emotion, practice inserting a deliberate two-second pause before responding. Do not fill the silence.',
+      prompt: 'After three calls, note what happened during each pause. Did the caller lower their voice? Did they provide more information? What did you notice about your own response?'
+    },
+    {
+      type: 'concept', unlockDay: 12,
+      title: 'When De-Escalation Is Not Working',
+      body: 'Not every call can be de-escalated through communication alone. Knowing when to shift strategy, when to bring in a supervisor, or when to accept that the caller is beyond your reach is part of professional maturity.',
+      prompt: 'Think about a call where you did everything right and the caller still did not de-escalate. What did you learn? Was there a point where shifting strategy earlier would have helped?'
+    },
+    {
+      type: 'reflection', unlockDay: 13,
+      title: 'Week 2 Reflection',
+      body: 'Two weeks in. Your de-escalation instincts should be sharpening. Some techniques probably feel more natural than others.',
+      prompt: 'Which de-escalation technique has been easiest to apply on the headset? Which has been the hardest? What support would help you develop the harder skill?'
+    },
+    {
+      type: 'scenario', unlockDay: 14,
+      title: 'Scenario: The Repeat Caller',
+      body: 'A frequent caller is on the line again with a non-emergency complaint. They are escalating because they feel no one ever helps them. You have handled this caller before.',
+      prompt: 'How do you balance empathy with boundary-setting? What language acknowledges their frustration without reinforcing the cycle?'
+    },
+    {
+      type: 'concept', unlockDay: 15,
+      title: 'Cultural Competency in De-Escalation',
+      body: 'Communication styles, trust in authority, and expressions of distress vary across communities. Effective de-escalation requires cultural awareness without assumptions.',
+      prompt: 'Think about a call where a cultural difference affected the interaction. How did you adapt? What could you have done differently?'
+    },
+    {
+      type: 'challenge', unlockDay: 17,
+      title: 'Challenge: The Reframe',
+      body: 'Take three hostile statements you hear regularly on calls. For each one, write a de-escalation response that acknowledges the emotion without matching the hostility.',
+      prompt: 'Example: "You people never do anything!" becomes "I understand your frustration, and I take that seriously. Let me tell you exactly what is happening right now." Write three of your own.'
+    },
+    {
+      type: 'scenario', unlockDay: 19,
+      title: 'Scenario: The Multi-Agency Coordination',
+      body: 'A call is escalating while you coordinate with multiple agencies. The caller can hear uncertainty in the background. They are losing confidence that help is coming.',
+      prompt: 'How do you project calm and competence to the caller while managing complex coordination? What phrases reassure without making promises you cannot keep?'
+    },
+    {
+      type: 'reflection', unlockDay: 21,
+      title: 'Three-Week Milestone',
+      body: 'Research shows that consistent practice over 21 days begins to form lasting behavioral change. Your de-escalation skills are building neural pathways that will serve you under pressure.',
+      prompt: 'Describe one call from the past three weeks that went better than it would have before your training. What specifically did you do or say differently?'
+    },
+    {
+      type: 'concept', unlockDay: 23,
+      title: 'The Cumulative Effect of De-Escalation',
+      body: 'Every call you de-escalate successfully builds trust between your community and your agency. Every interaction where a person feels heard, even in crisis, strengthens the entire system.',
+      prompt: 'How do people in your community describe their experience calling 9-1-1? What role do you play in shaping that reputation?'
+    },
+    {
+      type: 'challenge', unlockDay: 25,
+      title: 'Challenge: Teach One Technique',
+      body: 'Choose one de-escalation technique from your training and explain it to a colleague in your own words. Teaching forces deeper understanding.',
+      prompt: 'After explaining it, ask your colleague to apply it to a hypothetical call. How did they do? What did you learn by teaching?'
+    },
+    {
+      type: 'scenario', unlockDay: 27,
+      title: 'Scenario: The High-Stakes, Time-Critical Call',
+      body: 'An active, evolving emergency. The caller is in distress. Information is incomplete. Multiple units are responding. Every second matters, and the caller is escalating.',
+      prompt: 'This is where everything comes together. Walk through your approach step by step. What do you prioritize first? How do you balance urgency with de-escalation?'
+    },
+    {
+      type: 'reflection', unlockDay: 29,
+      title: 'Final Reflection: The Dispatcher You Are Becoming',
+      body: 'Thirty-one days of reinforcement is nearly complete. The de-escalation habits you have built will shape your professional practice long after this portal expires.',
+      prompt: 'Write a brief statement to yourself about the dispatcher you are becoming. What commitment will you carry forward?'
+    },
+    {
+      type: 'challenge', unlockDay: 31,
+      title: 'Day 31: The Work Continues',
+      body: 'Today your portal access ends. Your growth does not. The de-escalation principles you have reinforced over these 31 days are part of your professional foundation now.',
+      prompt: 'Identify three de-escalation skills that have become part of your daily practice. These are yours to keep. Continue to sharpen them.'
+    }
+  ]
+};
+
+// =================================================================
+// APPLICATION LOGIC — No edits needed below this line
+// =================================================================
+
+let currentStudent = null;
+let currentEmail = null;
+let currentAgency = null;
+let currentDay = 0;
+
+// --- Access Code & Date Validation ---
+function getClassDate() {
+  return new Date(CONFIG.classDate + 'T00:00:00');
+}
+
+function getDayNumber() {
+  const classDate = getClassDate();
+  const now = new Date();
+  const diffTime = now.getTime() - classDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays + 1; // Day 1 = class day
+}
+
+function isExpired() {
+  return getDayNumber() > CONFIG.accessDays;
+}
+
+function getDaysRemaining() {
+  return Math.max(0, CONFIG.accessDays - getDayNumber() + 1);
+}
+
+// --- Login ---
+function handleLogin() {
+  const name = document.getElementById('student-name').value.trim();
+  const email = document.getElementById('student-email').value.trim();
+  const agency = document.getElementById('student-agency').value.trim();
+  const code = document.getElementById('access-code').value.trim().toUpperCase();
+  const errorEl = document.getElementById('login-error');
+
+  if (!name) {
+    errorEl.textContent = 'Please enter your full name.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (!email || !email.includes('@')) {
+    errorEl.textContent = 'Please enter a valid work email address.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (!agency) {
+    errorEl.textContent = 'Please enter your agency or organization name.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (code !== CONFIG.accessCode.toUpperCase()) {
+    errorEl.textContent = 'Invalid access code. Please check with your instructor.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (isExpired()) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('expired-screen').style.display = 'flex';
+    return;
+  }
+
+  currentStudent = name;
+  currentEmail = email;
+  currentAgency = agency;
+  currentDay = getDayNumber();
+  if (currentDay < 1) currentDay = 1;
+
+  showDashboard();
+}
+
+// Enter key on inputs
+document.addEventListener('DOMContentLoaded', () => {
+  ['student-name', 'student-email', 'student-agency', 'access-code'].forEach(id => {
+    document.getElementById(id).addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  });
+});
+
+// --- Dashboard ---
+function showDashboard() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+
+  // Set student info
+  document.getElementById('student-display').textContent = currentStudent + ' | ' + currentAgency;
+  document.getElementById('welcome-msg').textContent = 'Welcome back, ' + currentStudent.split(' ')[0];
+
+  // Set course title
+  const courseTitleEl = document.getElementById('course-title-display');
+  if (courseTitleEl) courseTitleEl.textContent = CONFIG.courseTitle;
+
+  // Days remaining badge
+  const daysEl = document.getElementById('days-remaining');
+  const remaining = getDaysRemaining();
+  daysEl.textContent = remaining + ' days remaining';
+  if (remaining <= 7) daysEl.className = 'days-badge critical';
+  else if (remaining <= 14) daysEl.className = 'days-badge warning';
+
+  // Progress
+  const pct = Math.min(100, Math.round((currentDay / CONFIG.accessDays) * 100));
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = 'Day ' + Math.min(currentDay, CONFIG.accessDays) + ' of ' + CONFIG.accessDays;
+
+  // Generate watermarks
+  generateWatermarks();
+
+  // Render content
+  renderContent('all');
+}
+
+// --- Watermark ---
+function generateWatermarks() {
+  const overlay = document.getElementById('watermark-overlay');
+  overlay.innerHTML = '';
+  const text = currentStudent.toUpperCase() + '  |  ' + currentAgency.toUpperCase() + '  |  ' + currentEmail.toUpperCase() + '  |  KTF CONFIDENTIAL';
+  const rows = 14;
+  const cols = 6;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const span = document.createElement('span');
+      span.className = 'watermark-text';
+      span.textContent = text;
+      span.style.top = (r * 100 - 50) + 'px';
+      span.style.left = (c * 550 - 200) + 'px';
+      overlay.appendChild(span);
+    }
+  }
+}
+
+// --- Content Rendering ---
+function renderContent(filter) {
+  const grid = document.getElementById('content-grid');
+  grid.innerHTML = '';
+
+  const filtered = CONFIG.content.filter(item => {
+    if (filter === 'all') return true;
+    if (filter === 'concepts') return item.type === 'concept';
+    if (filter === 'scenarios') return item.type === 'scenario';
+    if (filter === 'reflections') return item.type === 'reflection';
+    if (filter === 'challenges') return item.type === 'challenge';
+    return true;
+  });
+
+  filtered.forEach(item => {
+    const isLocked = item.unlockDay > currentDay;
+    const card = document.createElement('div');
+    card.className = 'content-card' + (isLocked ? ' locked' : '');
+    if (isLocked) card.setAttribute('data-unlock-day', item.unlockDay);
+
+    const tagClass = item.type === 'scenario' ? 'scenario' :
+                     item.type === 'reflection' ? 'reflection' :
+                     item.type === 'challenge' ? 'challenge' : '';
+
+    const tagLabel = item.type === 'concept' ? 'Key Concept' :
+                     item.type === 'scenario' ? 'Scenario' :
+                     item.type === 'reflection' ? 'Reflection' :
+                     'Challenge';
+
+    card.innerHTML = `
+      <div class="card-tag ${tagClass}">Day ${item.unlockDay} — ${tagLabel}</div>
+      <h3>${item.title}</h3>
+      <p>${item.body}</p>
+      ${item.prompt ? `<div class="card-prompt"><p>${item.prompt}</p></div>` : ''}
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+function showSection(section) {
+  document.querySelectorAll('.section-tab').forEach(tab => tab.classList.remove('active'));
+  event.target.classList.add('active');
+  renderContent(section);
+}
+
+// =================================================================
+// SCREENSHOT / COPY DETERRENTS
+// =================================================================
+
+// Block right-click
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Block keyboard shortcuts for screenshots, printing, copy
+document.addEventListener('keydown', (e) => {
+  // PrintScreen
+  if (e.key === 'PrintScreen') {
+    e.preventDefault();
+    flashScreen();
+  }
+  // Ctrl+P (print)
+  if (e.ctrlKey && e.key === 'p') {
+    e.preventDefault();
+  }
+  // Ctrl+S (save)
+  if (e.ctrlKey && e.key === 's') {
+    e.preventDefault();
+  }
+  // Ctrl+C (copy)
+  if (e.ctrlKey && e.key === 'c') {
+    // Allow in input fields
+    if (e.target.tagName === 'INPUT') return;
+    e.preventDefault();
+  }
+  // Ctrl+Shift+S, Cmd+Shift+3/4/5 (macOS screenshots)
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['s','S','3','4','5'].includes(e.key)) {
+    e.preventDefault();
+    flashScreen();
+  }
+  // Ctrl+Shift+I (dev tools)
+  if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+    e.preventDefault();
+  }
+  // F12
+  if (e.key === 'F12') {
+    e.preventDefault();
+  }
+});
+
+// Flash screen white briefly on detected screenshot attempt
+function flashScreen() {
+  const flash = document.getElementById('screenshot-flash');
+  flash.style.display = 'block';
+  setTimeout(() => { flash.style.display = 'none'; }, 150);
+}
+
+// Detect visibility change (possible screenshot on mobile)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && currentStudent) {
+    // Could log this event in production
+  }
+});
+
+// Block drag
+document.addEventListener('dragstart', (e) => e.preventDefault());
+
+// Clear clipboard on copy attempt
+document.addEventListener('copy', (e) => {
+  if (e.target.tagName !== 'INPUT') {
+    e.preventDefault();
+    e.clipboardData.setData('text/plain', 'Content copying is disabled. This material is proprietary to The Kim Turner Foundation.');
+  }
+});
+</script>
+
+</body>
+</html>
