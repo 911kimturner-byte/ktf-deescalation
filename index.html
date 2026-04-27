@@ -471,9 +471,9 @@
   .content-card:hover::before { opacity: 1; }
 
   .content-card.locked {
-    opacity: 0.15;
+    opacity: 0.04;
     pointer-events: none;
-    filter: blur(3px);
+    filter: blur(8px);
   }
 
   .content-card.locked::after {
@@ -532,6 +532,47 @@
     font-style: italic;
     color: var(--text-primary);
     line-height: 1.6;
+  }
+
+  .card-response {
+    margin-top: 12px;
+  }
+
+  .card-response label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .card-response textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+  }
+
+  .card-response textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .card-response textarea::placeholder {
+    color: var(--text-muted);
   }
 
   /* Footer */
@@ -1154,7 +1195,7 @@ function renderContent(filter) {
       <div class="card-tag ${tagClass}">Day ${item.unlockDay} — ${tagLabel}</div>
       <h3>${item.title}</h3>
       <p>${item.body}</p>
-      ${item.prompt ? `<div class="card-prompt"><p>${item.prompt}</p></div>` : ''}
+      ${item.prompt ? `<div class="card-prompt"><p>${item.prompt}</p>${!isLocked ? `<div class="card-response"><label>Your Response</label><textarea placeholder="Write your reflection here..."></textarea><div style="margin-top:6px; font-size:11px; color:var(--text-muted);">Your response is for your personal reflection only and will not be saved when you leave this page. Copy your notes before closing if you would like to keep them.</div></div>` : ''}</div>` : ''}
     `;
 
     grid.appendChild(card);
@@ -1192,7 +1233,7 @@ document.addEventListener('keydown', (e) => {
   // Ctrl+C (copy)
   if (e.ctrlKey && e.key === 'c') {
     // Allow in input fields
-    if (e.target.tagName === 'INPUT') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     e.preventDefault();
   }
   // Ctrl+Shift+S, Cmd+Shift+3/4/5 (macOS screenshots)
@@ -1229,7 +1270,7 @@ document.addEventListener('dragstart', (e) => e.preventDefault());
 
 // Clear clipboard on copy attempt
 document.addEventListener('copy', (e) => {
-  if (e.target.tagName !== 'INPUT') {
+  if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
     e.preventDefault();
     e.clipboardData.setData('text/plain', 'Content copying is disabled. This material is proprietary to The Kim Turner Foundation.');
   }
